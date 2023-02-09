@@ -10,143 +10,157 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.table.DefaultTableModel;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Farango
  */
 public class UserCrud extends DbConnection {
-    
+
     private PreparedStatement ps;
     private ResultSet rs;
-    
+
     public boolean Insert(User model) {
         Connection conn = getConnection();
         try {
-            
-            String sql = "INSERT INTO USER (name, email) VALUES (?,?)";
+
+            String sql = "INSERT INTO USER (name, email, phone, job_position) VALUES (?,?,?,?)";
             ps = conn.prepareStatement(sql);
             ps.setString(1, model.getName());
             ps.setString(2, model.getEmail());
+            ps.setString(3, model.getPhone());
+            ps.setString(4, model.getJobPosition());
             ps.execute();
             return true;
-            
+
         } catch (SQLException e) {
             System.err.println(e);
             return false;
-        }
-        finally {
+        } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
                 System.err.println(e);
             }
         }
-        
+
     }
-    
+
     public boolean Update(User model) {
         Connection conn = getConnection();
         try {
-            
-            String sql = "UPDATE USER SET name=?, email=? WHERE id=?";
+
+            String sql = "UPDATE USER SET name=?, email=?, phone=?, job_position=? WHERE id=?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, model.getName());
             ps.setString(2, model.getEmail());
-            ps.setInt(3, model.getId());
+            ps.setString(3, model.getPhone());
+            ps.setString(4, model.getJobPosition());
+            ps.setInt(5, model.getId());
             ps.execute();
             return true;
-            
+
         } catch (SQLException e) {
             System.err.println(e);
             return false;
-        }
-        finally {
+        } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
                 System.err.println(e);
             }
         }
-        
+
     }
-    
-    public boolean Delete(User model) {
+
+    public boolean Delete(int id) {
         Connection conn = getConnection();
         try {
-            
+
             String sql = "DELETE FROM USER WHERE id=?";
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, model.getId());
+            ps.setInt(1, id);
             ps.execute();
             return true;
-            
+
         } catch (SQLException e) {
             System.err.println(e);
             return false;
-        }
-        finally {
+        } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
                 System.err.println(e);
             }
-        }        
+        }
     }
     
-    public boolean Search(User model) {
+    public User GetById(int id) {
         Connection conn = getConnection();
         try {
-            String sql = "SELECT * FROM USER WHERE email LIKE %?%";
+            User model = new User();
+            String sql = "SELECT * FROM USER WHERE id=?";     
             ps = conn.prepareStatement(sql);
-            ps.setString(1, model.getEmail());
-            rs = ps.executeQuery(sql);
-            
-            if( rs.next() ){
-                model.setId( Integer.parseInt( rs.getString("id") ) );
-                model.setName( rs.getString("name") );
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                model.setId(Integer.parseInt(rs.getString("id")));
+                model.setName(rs.getString("name"));
+                model.setEmail(rs.getString("email"));
+                model.setPhone(rs.getString("phone"));
+                model.setJobPosition(rs.getString("job_position"));
             }
-            
-            return true;
-            
+
+            return model;
+
         } catch (SQLException e) {
             System.err.println(e);
-            return false;
-        }
-        finally {
+            return null;
+        } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
                 System.err.println(e);
             }
-        }        
+        }
     }
-    
-    public DefaultTableModel GetAll(){
+
+    public List<User> GetAll(String term) {
         Connection conn = getConnection();
-        DefaultTableModel dataTable = new DefaultTableModel();
-        dataTable.addColumn("Id");
-        dataTable.addColumn("Nombre");
-        dataTable.addColumn("Email");
-        String[] data = new String[3];
-        
+        List<User> users = new ArrayList<>();
         try {
             String sql = "SELECT * FROM USER";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery(sql);
-            
-            while( rs.next() ){
-                data[0] = rs.getString(1);
-                data[1] = rs.getString(2);
-                data[2] = rs.getString(3);
-                dataTable.addRow(data);
+            if( term != null ){
+                sql = "SELECT * FROM USER WHERE email LIKE ? OR name LIKE ? OR job_position LIKE ?";
+                ps = conn.prepareStatement(sql);
+                ps.setString( 1, MessageFormat.format("%{0}%", term) );
+                ps.setString( 2, MessageFormat.format("%{0}%", term) );
+                ps.setString( 3, MessageFormat.format("%{0}%", term) );
             }
-            return dataTable;
+            else {
+                ps = conn.prepareStatement(sql);
+            }
             
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User user = new User(
+                        Integer.parseInt(rs.getString(1)), 
+                        rs.getString(2), 
+                        rs.getString(3), 
+                        rs.getString(4), 
+                        rs.getString(5));
+                users.add(user);
+            }
+            return users;
+
         } catch (SQLException e) {
-            return dataTable;
+            return users;
         }
     }
-    
+
 }

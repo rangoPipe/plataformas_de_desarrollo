@@ -41,10 +41,11 @@ public class Main extends javax.swing.JFrame {
 
         jToolBar1.setRollover(true);
 
+        btnNew.setBackground(new java.awt.Color(153, 153, 153));
         btnNew.setText("Nuevo Usuario");
         btnNew.setFocusable(false);
         btnNew.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNew.setPreferredSize(new java.awt.Dimension(100, 24));
+        btnNew.setPreferredSize(new java.awt.Dimension(100, 30));
         btnNew.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -86,6 +87,8 @@ public class Main extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblUsers.setMinimumSize(new java.awt.Dimension(60, 0));
+        tblUsers.setRequestFocusEnabled(false);
         jScrollPane1.setViewportView(tblUsers);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -155,6 +158,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JToolBar jToolBar1;
     public javax.swing.JTable tblUsers;
-    private javax.swing.JTextField txtSearch;
+    public javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }
